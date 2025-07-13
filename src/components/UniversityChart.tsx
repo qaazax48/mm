@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, PieLabelRenderProps, TooltipProps } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, PieLabelRenderProps } from 'recharts';
 import { useEffect, useState } from 'react';
 
 interface ChartData {
@@ -10,7 +10,7 @@ interface UniversityChartProps {
   data: ChartData[];
 }
 
-interface CustomPayload extends ChartData {
+interface ProcessedData extends ChartData {
   percentage: number;
 }
 
@@ -196,7 +196,7 @@ export default function UniversityChart({ data }: UniversityChartProps) {
         }
       }
       return acc;
-    }, [] as any[]);
+    }, [] as ProcessedData[]);
 
   return (
     <div className="bg-white rounded-xl shadow-md p-4 md:p-6">
@@ -256,7 +256,7 @@ export default function UniversityChart({ data }: UniversityChartProps) {
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 width: '100%'
               }}
-              formatter={(value: string, entry: any) => {
+              formatter={(value: string, entry: { payload?: { percentage?: number; value?: number } }) => {
                 const percentage = entry?.payload?.percentage;
                 const count = entry?.payload?.value;
                 const displayText = window.innerWidth <= 768
