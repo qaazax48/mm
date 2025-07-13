@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, PieLabelRenderProps, TooltipProps } from 'recharts';
 import { useEffect, useState } from 'react';
 
 interface ChartData {
@@ -8,6 +8,17 @@ interface ChartData {
 
 interface UniversityChartProps {
   data: ChartData[];
+}
+
+interface CustomPayload extends ChartData {
+  percentage: number;
+}
+
+interface TooltipData {
+  payload?: {
+    percentage?: number;
+    value?: number;
+  }[];
 }
 
 const COLORS = [
@@ -114,26 +125,15 @@ export default function UniversityChart({ data }: UniversityChartProps) {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-    value
-  }: {
-    cx: number;
-    cy: number;
-    midAngle: number;
-    innerRadius: number;
-    outerRadius: number;
-    percent: number;
-    value: number;
-  }) => {
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.7;
-    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
-    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+  const renderCustomizedLabel = (props: PieLabelRenderProps) => {
+    if (!props.cx || !props.cy || !props.midAngle || !props.innerRadius || !props.outerRadius || !props.percent) {
+      return null;
+    }
+    
+    const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props;
+    const radius = Number(innerRadius) + (Number(outerRadius) - Number(innerRadius)) * 0.7;
+    const x = Number(cx) + radius * Math.cos(-Number(midAngle) * Math.PI / 180);
+    const y = Number(cy) + radius * Math.sin(-Number(midAngle) * Math.PI / 180);
 
     if (window.innerWidth <= 768) {
       if (percent < 0.15) return null;
@@ -226,10 +226,13 @@ export default function UniversityChart({ data }: UniversityChartProps) {
               ))}
             </Pie>
             <Tooltip 
-              formatter={(value: number, name: string, props: { payload: { percentage: number } }) => [
-                `${value} متطوع (${props.payload.percentage.toFixed(1)}%)`,
-                name
-              ]}
+              formatter={(value: number, name: string, entry: TooltipData) => {
+                const percentage = entry?.payload?.[0]?.percentage;
+                return [
+                  `${value} متطوع (${percentage?.toFixed(1) ?? 0}%)`,
+                  name
+                ];
+              }}
               contentStyle={{
                 backgroundColor: '#fff',
                 border: '1px solid #e5e7eb',
@@ -253,10 +256,12 @@ export default function UniversityChart({ data }: UniversityChartProps) {
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 width: '100%'
               }}
-              formatter={(value: string, entry: { payload: { percentage: number; value: number } }) => {
+              formatter={(value: string, entry: any) => {
+                const percentage = entry?.payload?.percentage;
+                const count = entry?.payload?.value;
                 const displayText = window.innerWidth <= 768
-                  ? `${value} (${entry.payload.percentage.toFixed(1)}%)`
-                  : `${value} (${entry.payload.value} متطوع - ${entry.payload.percentage.toFixed(1)}%)`;
+                  ? `${value} (${percentage?.toFixed(1)}%)`
+                  : `${value} (${count} متطوع - ${percentage?.toFixed(1)}%)`;
                 
                 return (
                   <span style={{ 
@@ -277,4 +282,4 @@ export default function UniversityChart({ data }: UniversityChartProps) {
       </div>
     </div>
   );
-}
+} 
