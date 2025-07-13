@@ -114,7 +114,23 @@ export default function UniversityChart({ data }: UniversityChartProps) {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, value }: any) => {
+  const renderCustomizedLabel = ({
+    cx,
+    cy,
+    midAngle,
+    innerRadius,
+    outerRadius,
+    percent,
+    value
+  }: {
+    cx: number;
+    cy: number;
+    midAngle: number;
+    innerRadius: number;
+    outerRadius: number;
+    percent: number;
+    value: number;
+  }) => {
     const radius = innerRadius + (outerRadius - innerRadius) * 0.7;
     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
     const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
@@ -210,7 +226,7 @@ export default function UniversityChart({ data }: UniversityChartProps) {
               ))}
             </Pie>
             <Tooltip 
-              formatter={(value: number, name: string, props: any) => [
+              formatter={(value: number, name: string, props: { payload: { percentage: number } }) => [
                 `${value} متطوع (${props.payload.percentage.toFixed(1)}%)`,
                 name
               ]}
@@ -237,7 +253,7 @@ export default function UniversityChart({ data }: UniversityChartProps) {
                 fontFamily: 'system-ui, -apple-system, sans-serif',
                 width: '100%'
               }}
-              formatter={(value: string, entry: any) => {
+              formatter={(value: string, entry: { payload: { percentage: number; value: number } }) => {
                 const displayText = window.innerWidth <= 768
                   ? `${value} (${entry.payload.percentage.toFixed(1)}%)`
                   : `${value} (${entry.payload.value} متطوع - ${entry.payload.percentage.toFixed(1)}%)`;
@@ -261,4 +277,4 @@ export default function UniversityChart({ data }: UniversityChartProps) {
       </div>
     </div>
   );
-} 
+}
